@@ -1,7 +1,7 @@
 name: CI/CD DEPLOYMENT
 
 on:
-  push:
+  pull_request:
     branches:
       - main
 
