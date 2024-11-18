@@ -1,4 +1,4 @@
-name: CI/CD DEPLOYMENT
+name: CI/CD DEPLOYMENT TO DEMO SERVER
 
 on:
   pull_request:
