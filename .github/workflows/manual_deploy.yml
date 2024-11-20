@@ -1,4 +1,4 @@
-name: MANUAL CI/CD DEPLOYMENT
+name: MANUAL DEMO SERVER DEPLOYMENT
 
 on:
   workflow_dispatch:
@@ -16,41 +16,45 @@ jobs:
       - name: Set up SSH
         uses: webfactory/ssh-agent@v0.9.0
         with:
-          ssh-private-key: ${{ secrets.LIGHTSAIL_SSH_KEY }}
+          ssh-private-key: ${{ secrets.NOQ_LIGHTSAIL_SSH_KEY }}
 
       - name: Test SSH connection
         run: |
-          ssh -o StrictHostKeyChecking=no ubuntu@${{ secrets.LIGHTSAIL_STATIC_IP }} "echo 'SSH connection successful!'"
+          ssh -o StrictHostKeyChecking=no ubuntu@${{ secrets.DEMO_LIGHTSAIL_STATIC_IP }} "echo 'SSH connection successful!'"
 
       - name: Build and Deploy
         if: success()
         run: |
-          ssh -o StrictHostKeyChecking=no ubuntu@${{ secrets.LIGHTSAIL_STATIC_IP }} << 'EOF'
+          ssh -o StrictHostKeyChecking=no ubuntu@${{ secrets.DEMO_LIGHTSAIL_STATIC_IP }} << 'EOF'
           cd /home/ubuntu/noq_app_deployment
-          
-          # Stash local changes 
-          echo "STASHING LOCAL CHANGES..."
-          git stash
           
           # Handle submodule updates
           echo "FETCHING AND UPDATING SUBMODULES..."
-          git submodule update --init --recursive
-          git submodule foreach 'git pull origin main'
-          
-          # Apply the stash
-          echo "APPLYING STASHED CHANGES FOR BACKEND..."
-          git stash apply || true
+          git submodule update --init --recursive --remote --force
+
+          # Create and setup .env file
+          echo "SETTING UP .env..."
+          rm -f .env
+          {
+            echo "DB_NAME=${{ secrets.DEMO_DB_NAME }}"
+            echo "DB_USER=${{ secrets.DEMO_DB_USER }}"
+            echo "DB_PASS=${{ secrets.DEMO_DB_PASS }}"
+            echo "SECRET_KEY=${{ secrets.DEMO_SECRET_KEY }}"
+            echo "DJANGO_SETTINGS_MODULE=${{ secrets.DEMO_DJANGO_SETTINGS_MODULE }}"
+            echo "ALLOWED_HOSTS=${{ secrets.DEMO_ALLOWED_HOSTS }}"
+          } > .env
           
           # Update .env.prod for the frontend service
           cd noQ-Frontend
           echo "SETTING UP .env.prod..."
           rm -f .env.prod
           echo "NOQ_OS_MOCK_API=false" > .env.prod
-          echo "NOQ_BASE_URL=http://${{ secrets.LIGHTSAIL_STATIC_IP }}/" >> .env.prod
+          echo "NOQ_BASE_URL=http://${{ secrets.DEMO_LIGHTSAIL_STATIC_IP }}/" >> .env.prod
           cd ..
 
-          # Docker operations
+          # Docker operations with SERVER_IP secret
           echo "STARTING DOCKER OPERATIONS..."
+
           sudo docker-compose down
           sudo docker-compose build --no-cache
           sudo docker-compose up -d
