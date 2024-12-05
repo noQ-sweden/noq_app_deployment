@@ -1,4 +1,4 @@
-name: MANUAL DEMO SERVER DEPLOYMENT
+name: MANUAL Deploy to Demo Server
 
 on:
   workflow_dispatch:
@@ -17,15 +17,20 @@ jobs:
         uses: webfactory/ssh-agent@v0.9.0
         with:
           ssh-private-key: ${{ secrets.NOQ_LIGHTSAIL_SSH_KEY }}
+          github-url: ""
+
+      - name: Add server to known_hosts
+        run: |
+          ssh-keyscan -H ${{ secrets.DEMO_LIGHTSAIL_STATIC_IP }} >> ~/.ssh/known_hosts
 
       - name: Test SSH connection
         run: |
-          ssh -o StrictHostKeyChecking=no ubuntu@${{ secrets.DEMO_LIGHTSAIL_STATIC_IP }} "echo 'SSH connection successful!'"
+          ssh ubuntu@${{ secrets.DEMO_LIGHTSAIL_STATIC_IP }} "echo 'SSH connection successful!'"
 
       - name: Build and Deploy
         if: success()
         run: |
-          ssh -o StrictHostKeyChecking=no ubuntu@${{ secrets.DEMO_LIGHTSAIL_STATIC_IP }} << 'EOF'
+          ssh ubuntu@${{ secrets.DEMO_LIGHTSAIL_STATIC_IP }} << 'EOF'
           cd /home/ubuntu/noq_app_deployment
           
           # Handle submodule updates
