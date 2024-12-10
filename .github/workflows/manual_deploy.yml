@@ -40,7 +40,7 @@ jobs:
             echo "DB_USER=${{ secrets.DEMO_DB_USER }}"
             echo "DB_PASS=${{ secrets.DEMO_DB_PASS }}"
             echo "SECRET_KEY=${{ secrets.DEMO_SECRET_KEY }}"
-            echo "DJANGO_SETTINGS_MODULE=${{ env.TEST_DEMO_DJANGO_SETTINGS_MODULE }}"
+            echo "DJANGO_SETTINGS_MODULE=${{ DEMO_DJANGO_SETTINGS_MODULE }}"
             echo "ALLOWED_HOSTS=${{ secrets.DEMO_ALLOWED_HOSTS }}"
           } > .env
           
