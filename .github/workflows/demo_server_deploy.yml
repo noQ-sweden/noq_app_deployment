@@ -51,7 +51,7 @@ jobs:
           echo "SETTING UP .env.prod..."
           rm -f .env.prod
           echo "NOQ_OS_MOCK_API=false" > .env.prod
-          echo "NOQ_BASE_URL=http://${{ secrets.DEMO_LIGHTSAIL_STATIC_IP }}/" >> .env.prod
+          echo "NOQ_BASE_URL=http://demo.noqapp.se/" >> .env.prod
           cd ..
 
           # Docker operations with SERVER_IP secret
