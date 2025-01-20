@@ -61,5 +61,5 @@ jobs:
           sudo docker-compose build --no-cache
           sudo docker-compose up -d
 
-          echo 'End of Deployment'
+          echo 'End of Deployment.'
           EOF
