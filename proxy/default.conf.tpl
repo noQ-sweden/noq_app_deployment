@@ -20,6 +20,7 @@ server {
         client_max_body_size    10M;
     }
 
+
     location /static {
         alias                   /vol/web;
     }
