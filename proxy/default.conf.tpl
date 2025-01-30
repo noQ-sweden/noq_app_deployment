@@ -1,11 +1,13 @@
 server {
     listen ${LISTEN_PORT};
 
-    server_name localhost;
+    server_name 192.168.1.102 localhost;
+    root        /frontend/dist;
+
+    error_page 404 =200 /index.html;
 
     location / {
-        root                    /frontend/dist;
-        index                   index.html;
+        index       index.html;
     }
 
     location /api {
