@@ -1,7 +1,7 @@
 server {
     listen ${LISTEN_PORT};
 
-    server_name 192.168.1.102 localhost;
+    server_name localhost;
     root        /frontend/dist;
 
     error_page 404 =200 /index.html;
