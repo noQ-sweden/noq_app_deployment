@@ -2,9 +2,10 @@ services:
   backend:
     build:
       context: ./noq_backend_python
+    container_name: ${CONTAINER_BACKEND_NAME}
     restart: always
     volumes:
-      - static-data:/vol/web
+      - static-backend:/vol/web
     environment:
       - SECRET_KEY=${SECRET_KEY}
       - DB_HOST=db
@@ -19,6 +20,7 @@ services:
   frontend:
     build:
       context: ./noQ-Frontend
+    container_name: ${CONTAINER_FRONTEND_NAME}
     volumes:
       - static-frontend:/frontend
     command: npm run build -- --mode prod
@@ -28,6 +30,7 @@ services:
   db:
     image: postgres:16.3-alpine
     restart: always
+    container_name: ${CONTAINER_DB_NAME}
     volumes:
       - postgres-data:/var/lib/postgresql/data
     environment:
@@ -38,6 +41,7 @@ services:
   proxy:
     build:
       context: ./proxy
+    container_name: ${CONTAINER_PROXY_NAME}
     restart: always
     depends_on:
       - backend
@@ -45,11 +49,11 @@ services:
     ports:
       - 80:8000
     volumes:
-      - static-data:/vol/web
+      - static-backend:/vol/web
       - static-frontend:/frontend
 
 volumes:
   postgres-data:
-  static-data:
+  static-backend:
   static-frontend:
 
