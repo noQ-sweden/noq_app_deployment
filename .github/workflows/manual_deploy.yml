@@ -20,12 +20,12 @@ jobs:
 
       - name: Test SSH connection
         run: |
-          ssh -o StrictHostKeyChecking=no ubuntu@${{ secrets.DEMO_LIGHTSAIL_URL }} "echo 'SSH connection successful!'"
+          ssh -o StrictHostKeyChecking=no ubuntu@${{ secrets.DEMO_LIGHTSAIL_IP  }} "echo 'SSH connection successful!'"
 
       - name: Build and Deploy
         if: success()
         run: |
-          ssh -o StrictHostKeyChecking=no ubuntu@${{ secrets.DEMO_LIGHTSAIL_URL }} << 'EOF'
+          ssh -o StrictHostKeyChecking=no ubuntu@${{ secrets.DEMO_LIGHTSAIL_IP  }} << 'EOF'
           cd /home/ubuntu/noq_app_deployment
           
           # Handle submodule updates
