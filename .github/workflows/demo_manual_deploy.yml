@@ -42,6 +42,10 @@ jobs:
             echo "SECRET_KEY=${{ secrets.DEMO_SECRET_KEY }}"
             echo "DJANGO_SETTINGS_MODULE=${{ secrets.DEMO_DJANGO_SETTINGS_MODULE }}"
             echo "ALLOWED_HOSTS=${{ secrets.DEMO_ALLOWED_HOSTS }}"
+            CONTAINER_BACKEND_NAME=${{ secrets.DEMO_CONTAINER_BACKEND_NAME }}"
+            CONTAINER_FRONTEND_NAME=${{ secrets.DEMO_CONTAINER_FRONTEND_NAME }}"
+            CONTAINER_DB_NAME=postgres-${{ secrets.DEMO_CONTAINER_DATABASE_NAME }}"
+            CONTAINER_PROXY_NAME=${{ secrets.DEMO_CONTAINER_PROXY_NAME}}"
           } > .env
           
           # Update .env.prod for the frontend service
