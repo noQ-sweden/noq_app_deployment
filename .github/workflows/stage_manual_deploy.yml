@@ -1,0 +1,69 @@
+name: MANUAL Deploy to STAGE Instance
+
+on:
+  workflow_dispatch:
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository with submodules
+        uses: actions/checkout@v4
+        with:
+          submodules: true 
+
+      - name: Set up SSH
+        uses: webfactory/ssh-agent@v0.9.0
+        with:
+          ssh-private-key: ${{ secrets.STAGE_LIGHTSAIL_SSH_KEY }}
+
+      - name: Test SSH connection
+        run: |
+          ssh -o StrictHostKeyChecking=no ubuntu@${{ secrets.STAGE_LIGHTSAIL_IP  }} "echo 'SSH connection successful!'"
+
+      - name: Build and Deploy
+        if: success()
+        run: |
+          ssh -o StrictHostKeyChecking=no ubuntu@${{ secrets.STAGE_LIGHTSAIL_IP  }} << 'EOF'
+          cd /home/ubuntu/noq_app_deployment
+          
+          # Handle submodule updates
+          echo "FETCHING AND UPDATING SUBMODULES..."
+          git submodule update --init --recursive --remote --force
+
+          # Create and setup .env file
+          echo "SETTING UP .env..."
+          rm -f .env
+          {
+            echo "DB_NAME=${{ secrets.STAGE_DB_NAME }}"
+            echo "DB_USER=${{ secrets.STAGE_DB_USER }}"
+            echo "DB_PASS=${{ secrets.STAGE_DB_PASS }}"
+            echo "SECRET_KEY=${{ secrets.STAGE_SECRET_KEY }}"
+            echo "DJANGO_SETTINGS_MODULE=${{ secrets.STAGE_DJANGO_SETTINGS_MODULE }}"
+            echo "ALLOWED_HOSTS=${{ secrets.STAGE_ALLOWED_HOSTS }}"
+            CONTAINER_BACKEND_NAME=${{ secrets.STAGE_CONTAINER_BACKEND_NAME }}"
+            CONTAINER_FRONTEND_NAME=${{ secrets.STAGE_CONTAINER_FRONTEND_NAME }}"
+            CONTAINER_DB_NAME=postgres-${{ secrets.STAGE_CONTAINER_DATABASE_NAME }}"
+            CONTAINER_PROXY_NAME=${{ secrets.STAGE_CONTAINER_PROXY_NAME}}"
+
+          } > .env
+          
+          # Update .env.prod for the frontend service
+          cd noQ-Frontend
+          echo "SETTING UP .env.prod..."
+          rm -f .env.prod
+          echo "NOQ_OS_MOCK_API=false" > .env.prod
+          echo "NOQ_BASE_URL=${{ secrets.STAGE_LIGHTSAIL_DOMAIN_URL }}" >> .env.prod
+          cd ..
+
+          # Docker operations with SERVER_IP secret
+          echo "STARTING DOCKER OPERATIONS..."
+
+          sudo docker-compose down
+          sudo docker volume rm noq_app_deployment_static-frontend || true
+          sudo docker-compose build --no-cache
+          sudo docker-compose up -d
+
+          echo 'End of Deployment.'
+          EOF
