@@ -25,13 +25,17 @@ jobs:
 
       - name: Build and Push Docker Images
         run: |
-          # Build and push backend image
-          docker build -t ghcr.io/noq/backend:$IMAGE_TAG -f Dockerfile.backend .
-          docker push ghcr.io/noq/backend:$IMAGE_TAG
+          # Build and push noQ-Frontend image
+          docker build -t ghcr.io/noq/noq-frontend:$IMAGE_TAG $GITHUB_WORKSPACE/noQ-Frontend
+          docker push ghcr.io/noq/noq-frontend:$IMAGE_TAG
 
-          # Build and push frontend image
-          docker build -t ghcr.io/noq/frontend:$IMAGE_TAG -f Dockerfile.frontend .
-          docker push ghcr.io/noq/frontend:$IMAGE_TAG
+          # Build and push noq_backend_python image
+          docker build -t ghcr.io/noq/noq-backend-python:$IMAGE_TAG $GITHUB_WORKSPACE/noq_backend_python
+          docker push ghcr.io/noq/noq-backend-python:$IMAGE_TAG
+
+          # Build and push nginx image
+          docker build -t ghcr.io/noq/nginx:$IMAGE_TAG $GITHUB_WORKSPACE/proxy
+          docker push ghcr.io/noq/nginx:$IMAGE_TAG
 
   deploy:
     needs: build
