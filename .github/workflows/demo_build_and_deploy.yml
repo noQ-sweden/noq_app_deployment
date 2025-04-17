@@ -26,12 +26,12 @@ jobs:
       - name: Build and Push Docker Images
         run: |
           # Build and push backend image
-          docker build -t ghcr.io/${{ github.repository }}/backend:$IMAGE_TAG -f Dockerfile.backend .
-          docker push ghcr.io/${{ github.repository }}/backend:$IMAGE_TAG
+          docker build -t ghcr.io/noq/backend:$IMAGE_TAG -f Dockerfile.backend .
+          docker push ghcr.io/noq/backend:$IMAGE_TAG
 
           # Build and push frontend image
-          docker build -t ghcr.io/${{ github.repository }}/frontend:$IMAGE_TAG -f Dockerfile.frontend .
-          docker push ghcr.io/${{ github.repository }}/frontend:$IMAGE_TAG
+          docker build -t ghcr.io/noq/frontend:$IMAGE_TAG -f Dockerfile.frontend .
+          docker push ghcr.io/noq/frontend:$IMAGE_TAG
 
   deploy:
     needs: build
@@ -67,8 +67,8 @@ jobs:
             echo "CONTAINER_FRONTEND_NAME=${{ secrets.DEMO_CONTAINER_FRONTEND_NAME }}"
             echo "CONTAINER_DB_NAME=postgres-${{ secrets.DEMO_CONTAINER_DATABASE_NAME }}"
             echo "CONTAINER_PROXY_NAME=${{ secrets.DEMO_CONTAINER_PROXY_NAME}}"
-            echo "BACKEND_IMAGE=ghcr.io/${{ github.repository }}/backend:$IMAGE_TAG"
-            echo "FRONTEND_IMAGE=ghcr.io/${{ github.repository }}/frontend:$IMAGE_TAG"
+            echo "BACKEND_IMAGE=ghcr.io/noq/backend:$IMAGE_TAG"
+            echo "FRONTEND_IMAGE=ghcr.io/noq/frontend:$IMAGE_TAG"
           } > .env
           
           # Update .env.prod for the frontend service
