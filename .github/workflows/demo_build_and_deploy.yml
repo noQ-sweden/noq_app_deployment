@@ -39,8 +39,8 @@ jobs:
 
           # Build and push a test image
           docker pull node:22-alpine
-          docker tag node:22-alpine ghcr.io/noq/node:$IMAGE_TAG
-          docker push ghcr.io/noq/node:$IMAGE_TAG
+          docker tag node:22-alpine ghcr.io/ghcr.io/noq-sweden/noq_app_deployment/node:$IMAGE_TAG
+          docker push ghcr.io/ghcr.io/noq-sweden/noq_app_deployment/node:$IMAGE_TAG
 
   deploy:
     needs: build
