@@ -1,0 +1,88 @@
+name: CI/CD to DEMO Instance with GHCR
+# This workflow builds and deploys Docker images to a DEMO instance on AWS Lightsail using GitHub Actions and GitHub Container Registry (GHCR).
+
+on:
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    env:
+      IMAGE_TAG: ${{ github.run_id }}
+
+    steps:
+      - name: Checkout repository with submodules
+        uses: actions/checkout@v4
+        with:
+          submodules: true 
+
+      - name: Log in to GitHub Container Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Build and Push Docker Images
+        run: |
+          # Build and push backend image
+          docker build -t ghcr.io/${{ github.repository }}/backend:$IMAGE_TAG -f Dockerfile.backend .
+          docker push ghcr.io/${{ github.repository }}/backend:$IMAGE_TAG
+
+          # Build and push frontend image
+          docker build -t ghcr.io/${{ github.repository }}/frontend:$IMAGE_TAG -f Dockerfile.frontend .
+          docker push ghcr.io/${{ github.repository }}/frontend:$IMAGE_TAG
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    env:
+      IMAGE_TAG: ${{ github.run_id }}
+
+    steps:
+      - name: Set up SSH
+        uses: webfactory/ssh-agent@v0.9.0
+        with:
+          ssh-private-key: ${{ secrets.DEMO_LIGHTSAIL_SSH_KEY }}
+
+      - name: Test SSH connection
+        run: |
+          ssh -o StrictHostKeyChecking=no ubuntu@${{ secrets.DEMO_LIGHTSAIL_IP  }} "echo 'SSH connection successful!'"
+
+      - name: Deploy to DEMO Instance
+        run: |
+          ssh -o StrictHostKeyChecking=no ubuntu@${{ secrets.DEMO_LIGHTSAIL_IP  }} << 'EOF'
+          mkdir -p ~/noq_app_deployment && cd ~/noq_app_deployment
+          # Create and setup .env file
+          echo "SETTING UP .env..."
+          rm -f .env
+          {
+            echo "DB_NAME=${{ secrets.DEMO_DB_NAME }}"
+            echo "DB_USER=${{ secrets.DEMO_DB_USER }}"
+            echo "DB_PASS=${{ secrets.DEMO_DB_PASS }}"
+            echo "SECRET_KEY=${{ secrets.DEMO_SECRET_KEY }}"
+            echo "DJANGO_SETTINGS_MODULE=${{ secrets.DEMO_DJANGO_SETTINGS_MODULE }}"
+            echo "ALLOWED_HOSTS=${{ secrets.DEMO_ALLOWED_HOSTS }}"
+            echo "CONTAINER_BACKEND_NAME=${{ secrets.DEMO_CONTAINER_BACKEND_NAME }}"
+            echo "CONTAINER_FRONTEND_NAME=${{ secrets.DEMO_CONTAINER_FRONTEND_NAME }}"
+            echo "CONTAINER_DB_NAME=postgres-${{ secrets.DEMO_CONTAINER_DATABASE_NAME }}"
+            echo "CONTAINER_PROXY_NAME=${{ secrets.DEMO_CONTAINER_PROXY_NAME}}"
+            echo "BACKEND_IMAGE=ghcr.io/${{ github.repository }}/backend:$IMAGE_TAG"
+            echo "FRONTEND_IMAGE=ghcr.io/${{ github.repository }}/frontend:$IMAGE_TAG"
+          } > .env
+          
+          # Update .env.prod for the frontend service
+          cd ~/noq_app_deployment/noQ-Frontend
+          echo "SETTING UP .env.prod..."
+          rm -f ~/noq_app_deployment/noQ-Frontend/.env.prod
+          echo "NOQ_OS_MOCK_API=false" > ~/noq_app_deployment/noQ-Frontend/.env.prod
+          echo "NOQ_BASE_URL=${{ secrets.DEMO_LIGHTSAIL_DOMAIN_URL }}" >> .env.prod
+          cd ~/noq_app_deployment
+
+          # Docker deployment commands
+          echo "STARTING DOCKER OPERATIONS..."
+          sudo docker compose pull
+          sudo docker compose up -d --force-recreate --remove-orphans
+
+          echo 'End of Deployment.'
+          EOF
