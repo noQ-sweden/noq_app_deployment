@@ -61,7 +61,7 @@ jobs:
           # Docker operations with SERVER_IP secret
           echo "STARTING DOCKER OPERATIONS..."
 
-          sudo docker-compose down --volumes
+          sudo docker-compose down
           run: |
           MAX_RETRIES=5
           RETRY_DELAY=1
@@ -74,6 +74,7 @@ jobs:
               if [ -z "$CONTAINERS" ]; then
                   echo "No containers found — safe to remove volumes."
                   sudo docker volume rm noq_app_deployment_static-frontend || true
+                  sudo docker volume prune -f
                   break
               else
                   echo "Containers still running or stopped — retrying in $RETRY_DELAY seconds..."
