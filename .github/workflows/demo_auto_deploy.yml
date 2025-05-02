@@ -61,8 +61,31 @@ jobs:
           # Docker operations with SERVER_IP secret
           echo "STARTING DOCKER OPERATIONS..."
 
-          sudo docker-compose down
-          sudo docker volume rm noq_app_deployment_static-frontend || true
+          sudo docker-compose down --volumes
+          run: |
+          MAX_RETRIES=5
+          RETRY_DELAY=1
+          COUNT=0
+
+          while [ $COUNT -lt $MAX_RETRIES ]; do
+              echo "Checking for containers (attempt $((COUNT + 1)))..."
+              CONTAINERS=$(docker ps -aq)
+
+              if [ -z "$CONTAINERS" ]; then
+                  echo "No containers found — safe to remove volumes."
+                  sudo docker volume rm noq_app_deployment_static-frontend || true
+                  break
+              else
+                  echo "Containers still running or stopped — retrying in $RETRY_DELAY seconds..."
+                  sleep $RETRY_DELAY
+                  COUNT=$((COUNT + 1))
+              fi
+          done
+
+          if [ $COUNT -eq $MAX_RETRIES ]; then
+              echo "Containers still exist after $MAX_RETRIES attempts. Not able to remove old frontend volume."
+          fi
+
           sudo docker-compose build --no-cache
           sudo docker-compose up -d
 
