@@ -61,7 +61,7 @@ jobs:
           # Docker operations with SERVER_IP secret
           echo "STARTING DOCKER OPERATIONS..."
 
-          sudo docker-compose down
+          sudo docker compose down
           run: |
           MAX_RETRIES=5
           RETRY_DELAY=1
@@ -87,8 +87,8 @@ jobs:
               echo "Containers still exist after $MAX_RETRIES attempts. Not able to remove old frontend volume."
           fi
 
-          sudo docker-compose build --no-cache
-          sudo docker-compose up -d
+          sudo docker compose build --no-cache
+          sudo docker compose up -d
 
           echo 'End of Deployment.'
           EOF
