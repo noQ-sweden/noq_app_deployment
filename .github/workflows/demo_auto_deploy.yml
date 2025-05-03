@@ -61,17 +61,17 @@ jobs:
 
           # Docker operations with SERVER_IP secret
           echo "STARTING DOCKER OPERATIONS..."
-
+          # Shutdown docker services
           sudo docker compose down
-          run: |
+
+          # Remove anonymous volumes and noq_app_deployment_static-frontend volume
           MAX_RETRIES=5
           RETRY_DELAY=1
           COUNT=0
-
-          while [ $COUNT -lt $MAX_RETRIES ]; do
+          
+          while [ "$COUNT" -lt "$MAX_RETRIES" ]; do
               echo "Checking for containers (attempt $((COUNT + 1)))..."
               CONTAINERS=$(docker ps -aq)
-
               if [ -z "$CONTAINERS" ]; then
                   echo "No containers found — safe to remove volumes."
                   sudo docker volume rm noq_app_deployment_static-frontend || true
@@ -83,12 +83,14 @@ jobs:
                   COUNT=$((COUNT + 1))
               fi
           done
-
-          if [ $COUNT -eq $MAX_RETRIES ]; then
+          
+          if [ "$COUNT" -eq "$MAX_RETRIES" ]; then
               echo "Containers still exist after $MAX_RETRIES attempts. Not able to remove old frontend volume."
           fi
 
+          # Rebuild containers
           sudo docker compose build --no-cache
+          # Start services
           sudo docker compose up -d
 
           echo 'End of Deployment.'
