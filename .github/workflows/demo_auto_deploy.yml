@@ -33,6 +33,7 @@ jobs:
 
           # Update noq_app_deployment repo
           echo "UPDATING DEPLOYMENT REPO"
+          git stash
           git pull
           
           # Handle submodule updates
