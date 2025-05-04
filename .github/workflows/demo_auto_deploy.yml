@@ -48,7 +48,10 @@ jobs:
             CONTAINER_BACKEND_NAME=${{ secrets.DEMO_CONTAINER_BACKEND_NAME }}"
             CONTAINER_FRONTEND_NAME=${{ secrets.DEMO_CONTAINER_FRONTEND_NAME }}"
             CONTAINER_DB_NAME=postgres-${{ secrets.DEMO_CONTAINER_DATABASE_NAME }}"
-            CONTAINER_PROXY_NAME=${{ secrets.DEMO_CONTAINER_PROXY_NAME}}"
+            CONTAINER_PROXY_NAME=${{ secrets.DEMO_CONTAINER_PROXY_NAME }}"
+            EMAIL_HOST_USER=${{ secrets.EMAIL_HOST_USER }}"
+            EMAIL_HOST_PASSWORD=${{ secrets.EMAIL_HOST_PW }}"
+            RESET_LINK=${{ secrets.DEMO_RESET_LINK }}"
           } > .env
           
           # Update .env.prod for the frontend service
