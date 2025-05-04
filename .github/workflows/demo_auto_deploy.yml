@@ -57,6 +57,7 @@ jobs:
             echo "EMAIL_HOST_PASSWORD=${{ secrets.EMAIL_HOST_PW }}"
             echo "RESET_LINK=${{ secrets.DEMO_RESET_LINK }}"
             echo "FRONTEND_URL=${{ secrets.DEMO_FRONTEND_URL }}"
+            echo "SERVER_IP=${{ secrets.DEMO_SERVER_IP }}"            
           } > .env
           
           # Update .env.prod for the frontend service
