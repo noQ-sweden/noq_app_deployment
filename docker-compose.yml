@@ -55,6 +55,8 @@ services:
     volumes:
       - static-backend:/vol/web
       - static-frontend:/frontend
+    environment:
+      - SERVER_IP=${SERVER_IP}
 
 volumes:
   postgres-data:
