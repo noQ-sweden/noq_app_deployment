@@ -100,8 +100,12 @@ jobs:
 
           # Rebuild containers
           sudo docker compose build --no-cache
+          # Remove items in the build cache to prevent filling up the disk
+          sudo docker builder prune --all
           # Start services
           sudo docker compose up -d
+          # Prune dangling images to prevent filling up the disk
+          sudo docker image prune -f
 
           echo 'End of Deployment.'
           EOF
