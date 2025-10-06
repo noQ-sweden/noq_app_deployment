@@ -71,6 +71,9 @@ jobs:
 
           # Docker operations with SERVER_IP secret
           echo "STARTING DOCKER OPERATIONS..."
+          # Prune dangling images to prevent filling up the disk
+          sudo docker image prune -f
+
           # Shutdown docker services
           sudo docker compose down
 
@@ -98,14 +101,12 @@ jobs:
               echo "Containers still exist after $MAX_RETRIES attempts. Not able to remove old frontend volume."
           fi
 
-          # Rebuild containers
-          sudo docker compose build --no-cache
           # Remove items in the build cache to prevent filling up the disk
           sudo docker builder prune --all
+          # Rebuild containers
+          sudo docker compose build --no-cache
           # Start services
           sudo docker compose up -d
-          # Prune dangling images to prevent filling up the disk
-          sudo docker image prune -f
 
           echo 'End of Deployment.'
           EOF
